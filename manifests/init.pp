@@ -111,20 +111,25 @@ class clustershell (
   $ssh_path             = $clustershell::params::ssh_path,
   $ssh_options          = $clustershell::params::ssh_options,
   $ensure               = $clustershell::params::ensure,
+  $package_require      = $clustershell::params::package_require,
   $package_name         = $clustershell::params::package_name,
   $install_vim_syntax   = $clustershell::params::install_vim_syntax,
   $vim_package_name     = $clustershell::params::vim_package_name,
+  $clush_conf_dir       = $clustershell::params::clush_conf_dir,
   $clush_conf           = $clustershell::params::clush_conf,
   $clush_conf_template  = $clustershell::params::clush_conf_template,
   $groups_config        = $clustershell::params::groups_config,
   $groups_concat_dir    = $clustershell::params::groups_concat_dir,
   $groups_conf          = $clustershell::params::groups_conf,
   $groups_conf_template = $clustershell::params::groups_conf_template,
+  $groups_dir           = $clustershell::params::groups_dir,
+  $include_slurm_groups = false,
 ) inherits clustershell::params {
 
   # Validate booleans
   validate_bool($ssh_enable)
   validate_bool($install_vim_syntax)
+  validate_bool($include_slurm_groups)
 
   case $ensure {
     /(present)/: {
@@ -138,27 +143,55 @@ class clustershell (
     }
   }
 
+  case $::osfamily {
+    'RedHat': {
+      include ::epel
+    }
+    default: {
+      # Do nothing
+    }
+  }
+
   package { 'clustershell':
-    ensure => $package_ensure,
-    name   => $package_name,
+    ensure  => $package_ensure,
+    name    => $package_name,
+    require => $package_require,
   }
 
   # Might need to convert to class
   if $install_vim_syntax {
     package { 'vim-clustershell':
-      name => $vim_package_name,
+      ensure  => $package_ensure,
+      name    => $vim_package_name,
+      require => $package_require,
     }
   }
 
+  file { '/etc/clustershell':
+    ensure  => 'directory',
+    path    => $clush_conf_dir,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0755',
+    require => Package['clustershell'],
+  }
+
+  file { '/etc/clustershell/groups.conf.d':
+    ensure  => 'directory',
+    path    => $groups_dir,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0755',
+    require => File['/etc/clustershell'],
+  }
+
   file { $clush_conf:
+    ensure  => 'file',
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
-    require => Package['clustershell'],
-    content => $inline_template ? {
-      '' => template($clush_conf_template),
-      default => inline_template("${inline_template}\n"),
-    }
+    require => File['/etc/clustershell'],
+    content => template($clush_conf_template),
   }
 
   file { $groups_conf:
@@ -166,10 +199,7 @@ class clustershell (
     group   => 'root',
     mode    => '0644',
     require => Package['clustershell'],
-    content => $inline_template ? {
-      '' => template($groups_conf_template),
-      default => inline_template("${inline_template}\n"),
-    }
+    content => template($groups_conf_template),
   }
 
   file { $groups_concat_dir:
@@ -185,5 +215,15 @@ class clustershell (
     ensure         => present,
     require        => File[$groups_concat_dir],
     ensure_newline => true,
+  }
+
+  if $include_slurm_groups {
+    clustershell::group_source { 'slurm':
+      ensure  => $ensure,
+      map     => 'sinfo -h -o "%N" -p $GROUP',
+      all     => 'sinfo -h -o "%N"',
+      list    => 'sinfo -h -o "%P"',
+      reverse => 'sinfo -h -N -o "%P" -n $NODE',
+    }
   }
 }

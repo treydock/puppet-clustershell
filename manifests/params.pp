@@ -15,42 +15,42 @@ class clustershell::params {
 
   $fanout = $::clustershell_fanout ? {
     undef   => 64,
-    default => $clustershell_fanout,
+    default => $::clustershell_fanout,
   }
 
   $connect_timeout = $::clustershell_connect_timeout ? {
     undef   => 15,
-    default => $clustershell_connect_timout,
+    default => $::clustershell_connect_timout,
   }
 
   $command_timeout = $::clustershell_command_timeout ? {
     undef   => 0,
-    default => $clustershell_command_timeout,
+    default => $::clustershell_command_timeout,
   }
 
   $color = $::clustershell_color ? {
     undef   => 'auto',
-    default => $clustershell_color,
+    default => $::clustershell_color,
   }
 
   $fd_max = $::clustershell_fd_max ? {
     undef   => 16384,
-    default => $clustershell_fd_max,
+    default => $::clustershell_fd_max,
   }
 
   $history_size = $::clustershell_history_size ? {
     undef   => 100,
-    default => $clustershell_history_size,
+    default => $::clustershell_history_size,
   }
 
   $node_count = $::clustershell_node_count ? {
     undef   => 'yes',
-    default => $clustershell_node_count,
+    default => $::clustershell_node_count,
   }
 
   $verbosity = $::clustershell_verbosity ? {
     undef   => '1',
-    default => $clustershell_verbosity,
+    default => $::clustershell_verbosity,
   }
 
   # if top scope variable is a string, might need to convert to boolean
@@ -66,17 +66,17 @@ class clustershell::params {
 
   $ssh_user = $::clustershell_ssh_user ? {
     undef   => 'root',
-    default => $clustershell_ssh_user,
+    default => $::clustershell_ssh_user,
   }
 
   $ssh_path = $::clustershell_ssh_path ? {
     undef   => '/usr/bin/ssh',
-    default => $clustershell_ssh_path,
+    default => $::clustershell_ssh_path,
   }
 
   $ssh_options = $::clustershell_ssh_options ? {
     undef   => '-oStrictHostKeyChecking=no',
-    default => $clustershell_ssh_options,
+    default => $::clustershell_ssh_options,
   }
 
   # Following parameters should not be changed.
@@ -98,8 +98,11 @@ class clustershell::params {
 
   case $::osfamily {
     redhat: {
+      $package_require      = 'Yumrepo[epel]'
       $package_name         = 'clustershell'
       $vim_package_name     = 'vim-clustershell'
+
+      $clush_conf_dir       = '/etc/clustershell'
 
       $clush_conf           = '/etc/clustershell/clush.conf'
       $clush_conf_template  = 'clustershell/clush.conf.erb'
@@ -121,9 +124,11 @@ class clustershell::params {
 
       $groups_conf          = '/etc/clustershell/groups.conf'
       $groups_conf_template = 'clustershell/groups.conf.erb'
+
+      $groups_dir           = '/etc/clustershell/groups.conf.d'
     }
     default: {
-      fail("Module ${module} is not support on ${::osfamily}")
+      fail("Module ${module_name} is not support on ${::osfamily}")
     }
   }
 }

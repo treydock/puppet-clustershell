@@ -1,10 +1,17 @@
-source 'https://rubygems.org'
+source "http://rubygems.org"
 
-puppetversion = ENV.key?('PUPPET_VERSION') ? "= #{ENV['PUPPET_VERSION']}" : ['>= 3.2']
+group :development, :test do
+  gem 'rake',                     :require => false
+  gem 'rspec', '< 3.0.0',         :require => false
+  gem 'rspec-puppet',             :require => false, :git => 'https://github.com/rodjek/rspec-puppet.git'
+  gem 'puppetlabs_spec_helper',   :require => false
+  gem 'puppet-lint',              :require => false
+  gem 'puppet-syntax',            :require => false
+  gem 'beaker-rspec',             :require => false
+end
 
-gem 'rake'
-gem 'puppet-lint'
-gem 'puppetlabs_spec_helper'
-gem 'rspec-puppet'
-gem 'rspec-system-serverspec'
-gem 'puppet', puppetversion
+if puppetversion = ENV['PUPPET_GEM_VERSION']
+  gem 'puppet', puppetversion, :require => false
+else
+  gem 'puppet', :require => false
+end
