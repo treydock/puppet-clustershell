@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'clustershell::group_source' do
-  let(:facts) {{ :osfamily => "RedHat" }}
+  let(:facts) {{ :osfamily => "RedHat", :concat_basedir => "/dne" }}
 
   let(:title) { 'slurm' }
 

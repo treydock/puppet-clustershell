@@ -12,7 +12,7 @@ define clustershell::group (
   }
 
   # The init
-  concat::fragment { "group-{$group}-init":
+  concat::fragment { "group-${group}-init":
     ensure  => present,
     order   => 01,
     target  => $group_concat_file,

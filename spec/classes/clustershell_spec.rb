@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'clustershell' do
-  let(:facts) {{ :osfamily => "RedHat" }}
+  let(:facts) {{ :osfamily => "RedHat", :concat_basedir => "/dne" }}
 
   it { should create_class('clustershell') }
   it { should contain_class('clustershell::params') }
@@ -64,28 +64,6 @@ describe 'clustershell' do
   end
 
   it do
-    should contain_file('/etc/clustershell/groups').with({
-      :ensure   => 'file',
-      :owner    => 'root',
-      :group    => 'root',
-      :mode     => '0644',
-      :require  => 'File[/etc/clustershell]',
-    })
-  end
-
-  it do
-    verify_exact_contents(catalogue, '/etc/clustershell/groups', [
-      'adm: example0',
-      'oss: example4 example5',
-      'mds: example6',
-      'io: example[4-6]',
-      'compute: example[32-159]',
-      'gpu: example[156-159]',
-      'all: example[4-6,32-159]',
-    ])
-  end
-
-  it do
     should contain_file('/etc/clustershell/groups.conf').with({
       :ensure   => 'file',
       :owner    => 'root',
@@ -120,18 +98,6 @@ describe 'clustershell' do
         :list     => 'sinfo -h -o "%P"',
         :reverse  => 'sinfo -h -N -o "%P" -n $NODE',
       })
-    end
-  end
-
-  # Test validate_array parameters
-  [
-    :groups,
-  ].each do |param|
-    context "with #{param} => 'foo'" do
-      let(:params) {{ param.to_sym => 'foo' }}
-      it "should raise error" do
-        expect { should compile }.to raise_error(/is not an Array/)
-      end
     end
   end
 

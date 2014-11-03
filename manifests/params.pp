@@ -112,8 +112,11 @@ class clustershell::params {
 
       $groups_conf          = '/etc/clustershell/groups.conf'
       $groups_conf_template = 'clustershell/groups.conf.erb'
+
+      $groups_dir           = '/etc/clustershell/groups.conf.d'
     }
     debian: {
+      $package_require      = undef
       $package_name         = 'clustershell'
 
       $clush_conf           = '/etc/clustershell/clush.conf'

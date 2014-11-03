@@ -195,10 +195,11 @@ class clustershell (
   }
 
   file { $groups_conf:
+    ensure  => 'file',
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
-    require => Package['clustershell'],
+    require => File['/etc/clustershell'],
     content => template($groups_conf_template),
   }
 
@@ -207,7 +208,7 @@ class clustershell (
     owner   => 'root',
     group   => 'root',
     mode    => '0700',
-    require => Package['clustershell'],
+    require => File['/etc/clustershell'],
   }
 
   # Declare concat
