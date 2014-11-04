@@ -124,12 +124,15 @@ class clustershell (
   $groups_conf_template = $clustershell::params::groups_conf_template,
   $groups_dir           = $clustershell::params::groups_dir,
   $include_slurm_groups = false,
+  $groups               = $clustershell::params::groups,
+  $groupmembers         = $clustershell::params::groupmembers,
 ) inherits clustershell::params {
 
-  # Validate booleans
   validate_bool($ssh_enable)
   validate_bool($install_vim_syntax)
   validate_bool($include_slurm_groups)
+  validate_array($groups)
+  validate_hash($groupmembers)
 
   case $ensure {
     /(present)/: {
@@ -217,6 +220,12 @@ class clustershell (
     require        => File[$groups_concat_dir],
     ensure_newline => true,
   }
+
+  if ! empty($groups) {
+    clustershell::group { $groups: }
+  }
+
+  create_resources('clustershell::groupmember', $groupmembers)
 
   if $include_slurm_groups {
     clustershell::group_source { 'slurm':
