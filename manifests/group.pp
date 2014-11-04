@@ -6,7 +6,7 @@ define clustershell::group (
   $group_concat_file = "${clustershell::groups_concat_dir}/${group}"
 
   # Declare own concat params
-  concat { $group_concat_file:
+  datacat { $group_concat_file:
     ensure         => present,
     ensure_newline => false,
   }

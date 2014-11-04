@@ -3,12 +3,14 @@ define clustershell::groupmember (
   $group,
   $member = $title,
 ) {
-  $group_concat_file = "${clustershell::groups_concat_dir}/${group}"
 
-  concat::fragment { "groupmember-${group}-${member}":
-    ensure  => present,
-    order   => 02,
-    target  => $group_concat_file,
-    content => "${member} ",
+  $data = {
+    "${group}" => any2array($member),
   }
+
+  datacat_fragment { "clustershell::groupmember ${title}":
+    target => 'clustershell-groups',
+    data   => $data,
+  }
+
 }

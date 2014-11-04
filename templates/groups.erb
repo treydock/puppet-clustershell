@@ -2,8 +2,6 @@
 ### File managed by puppet
 ###
 
-<% if @groups.any? -%>
-<% @groups.each do |group| -%>
-<%= group %>
-<% end -%>
+<% @data.keys.sort.each do |group| -%>
+<%= group %>: <%= @data[group].join(',') %>
 <% end -%>

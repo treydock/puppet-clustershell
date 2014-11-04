@@ -206,23 +206,14 @@ class clustershell (
     content => template($groups_conf_template),
   }
 
-  file { $groups_concat_dir:
-    ensure  => 'directory',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0700',
-    require => File['/etc/clustershell'],
-  }
-
-  # Declare concat
-  concat { $groups_config:
-    ensure         => present,
-    require        => File[$groups_concat_dir],
-    ensure_newline => true,
-  }
-
-  if ! empty($groups) {
-    clustershell::group { $groups: }
+  datacat { 'clustershell-groups':
+    ensure   => present,
+    path     => $groups_config,
+    owner    => 'root',
+    group    => 'root',
+    mode     => '0644',
+    template => 'clustershell/groups.erb',
+    require  => File['/etc/clustershell'],
   }
 
   create_resources('clustershell::groupmember', $groupmembers)
