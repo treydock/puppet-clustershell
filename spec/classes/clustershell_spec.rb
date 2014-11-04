@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'clustershell' do
-  let(:facts) {{ :osfamily => "RedHat", :concat_basedir => "/dne" }}
+  let(:facts) {{ :osfamily => "RedHat" }}
 
   it { should create_class('clustershell') }
   it { should contain_class('clustershell::params') }
@@ -83,6 +83,18 @@ describe 'clustershell' do
       'all: sed -n \'s/^all:\(.*\)/\1/p\' /etc/clustershell/groups',
       'list: sed -n \'s/^\([0-9A-Za-z_-]*\):.*/\1/p\' /etc/clustershell/groups',
     ])
+  end
+
+  it do
+    should contain_datacat('clustershell-groups').with({
+      :ensure   => 'present',
+      :path     => '/etc/clustershell/groups',
+      :owner    => 'root',
+      :group    => 'root',
+      :mode     => '0644',
+      :template => 'clustershell/groups.erb',
+      :require  => 'File[/etc/clustershell]',
+    })
   end
 
   it { should_not contain_clustershell__group_source('slurm') }

@@ -124,14 +124,12 @@ class clustershell (
   $groups_conf_template = $clustershell::params::groups_conf_template,
   $groups_dir           = $clustershell::params::groups_dir,
   $include_slurm_groups = false,
-  $groups               = $clustershell::params::groups,
   $groupmembers         = $clustershell::params::groupmembers,
 ) inherits clustershell::params {
 
   validate_bool($ssh_enable)
   validate_bool($install_vim_syntax)
   validate_bool($include_slurm_groups)
-  validate_array($groups)
   validate_hash($groupmembers)
 
   case $ensure {
@@ -207,7 +205,7 @@ class clustershell (
   }
 
   datacat { 'clustershell-groups':
-    ensure   => present,
+    ensure   => 'present',
     path     => $groups_config,
     owner    => 'root',
     group    => 'root',

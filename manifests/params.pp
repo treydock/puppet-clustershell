@@ -96,7 +96,6 @@ class clustershell::params {
     $safe_install_vim_syntax = $install_vim_syntax
   }
 
-  $groups       = []
   $groupmembers = {}
 
   case $::osfamily {
